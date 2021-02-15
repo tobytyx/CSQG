@@ -142,4 +142,32 @@ button:hover{
 
 #mry-opo-content {
     padding: 10px;
+    text-align: center;
+}
+
+.pop-table {
+    margin: 0px auto;
+    padding-left: 20%;
+}
+
+.pop-table table td{
+    border: 1px solid #cad9ea;
+    color: #666;
+    height: 30px;
+    min-width: 100px;
+}
+
+.pop-table table tr:nth-child(odd){
+    background: #fff;
+}
+.pop-table table tr:nth-child(even){
+    background: #F5FAFA;
+}
+
+.pop-table table th {
+    background-color: #CCE8EB;
+    border: 1px solid #cad9ea;
+    color: #666;
+    height: 30px;
+    min-width: 100px;
 }

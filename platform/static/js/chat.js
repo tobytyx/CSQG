@@ -1,6 +1,7 @@
 
 var img_path = '';
 var record_id = '';
+var turn = 1;
 var start_chat = false;
 
 (
@@ -40,29 +41,83 @@ var start_chat = false;
           this.scrollToBottom();
           this.$textarea.val('');
           // responses
-          
-          var query = "";
-          $.ajax({
-            type: 'POST',
-            async: false,
-            url: "/request/query/",
-            data: {"user_id": user_id, "img_name": img_path, "record_id": record_id},
-            success: function(rdata){
-              query = rdata["query"];
-              record_id = rdata["record_id"];
-            },
-            dataType: "json"
-          });
-          console.log("query: ", query);
-          var templateResponse = Handlebars.compile( $("#message-response-template").html());
-          var contextResponse = { 
-            response: query,
-            time: this.getCurrentTime()
-          };          
-          setTimeout(function() {
-            this.$chatHistoryList.append(templateResponse(contextResponse));
-            this.scrollToBottom();
-          }.bind(this), 1500);
+          if(turn < 5){
+            var query = "";
+            $.ajax({
+              type: 'POST',
+              async: false,
+              url: "/request/query/",
+              data: {"user_id": user_id, "img_name": img_path, "record_id": record_id, "answer": this.messageToSend.trim()},
+              success: function(rdata){
+                query = rdata["query"];
+                record_id = rdata["record_id"];
+              },
+              dataType: "json"
+            });
+            var templateResponse = Handlebars.compile( $("#message-response-template").html());
+            var contextResponse = { 
+              response: query,
+              time: this.getCurrentTime()
+            };          
+            setTimeout(function() {
+              this.$chatHistoryList.append(templateResponse(contextResponse));
+              this.scrollToBottom();
+            }.bind(this), 1500);
+            console.log(turn);
+            turn = turn + 1;
+          }
+          else if(turn == 5){
+            $.ajax({
+              type: 'POST',
+              async: false,
+              url: "/request/guess/",
+              data: {"record_id": record_id, "answer": this.messageToSend.trim()},
+              success: function(rdata){
+                img_path = rdata["img_path"];
+                $(".guess-img").replaceWith(
+                  '<div class="guess-img"><img src="'+ img_path +'"/></div>'
+                );
+              },
+              dataType: "json"
+            });
+            var templateResponse = Handlebars.compile( $("#message-response-template").html());
+            var contextResponse = { 
+              response: "Am I right?",
+              time: this.getCurrentTime()
+            };
+            setTimeout(function() {
+              this.$chatHistoryList.append(templateResponse(contextResponse));
+              this.scrollToBottom();
+            }.bind(this), 1500);
+            console.log(turn);
+            turn = turn + 1;
+          }
+          else if(turn == 6){
+            var response = "Oh, I should have known!";
+            $.ajax({
+              type: 'POST',
+              async: false,
+              url: "/record/insert/",
+              data: {"record_id": record_id, "guess": this.messageToSend.trim()},
+              success: function(rdata){
+                if(rdata["guess"]){
+                  response = "Ha ha, how cleaver am I !"
+                }
+              },
+              dataType: "json"
+            });
+            var templateResponse = Handlebars.compile( $("#message-response-template").html());
+            var contextResponse = { 
+              response: response,
+              time: this.getCurrentTime()
+            };
+            setTimeout(function() {
+              this.$chatHistoryList.append(templateResponse(contextResponse));
+              this.scrollToBottom();
+            }.bind(this), 1500);
+            console.log(turn);
+            turn = turn + 1;
+          }
         }
 
         if(start_chat) {

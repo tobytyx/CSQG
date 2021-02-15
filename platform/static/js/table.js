@@ -55,9 +55,9 @@ function tableCreate() {
     for (var i in filtrateTable) {
         var trHtml = $("<tr>" +
             "<td>" + (filtrateTable[i].record_id || 'N/A') + "</td>" +
-            "<td>" + filtrateTable[i].turn + "</td>" +
-            "<td>" + (filtrateTable[i].create_time || 'N/A') + "</td>" +
-            "<td>" + (filtrateTable[i].end_time || 'N/A') + "</td>" +
+            "<td>" + filtrateTable[i].create_time + "</td>" +
+            "<td>" + (filtrateTable[i].img_name || 'N/A') + "</td>" +
+            "<td>" + (filtrateTable[i].guess || 'N/A') + "</td>" +
             "<td>" +
             "<button class='checkBtn' onclick='pop(&quot;" + filtrateTable[i].record_id + "&quot;)'>详情</button>" +
             "<button class='checkBtn' onclick='check(&quot;" + filtrateTable[i].record_id + "&quot;)'>删除</button>" +
@@ -299,13 +299,15 @@ function check(id) {
 /* 弹窗的 */
 function pop(record_id) {
     var pop_data = []
+    var img_path = ""
     $.ajax({
         type: 'GET',
         async: false,
         url: "/record/detail/",
         data: {"record_id": record_id},
         success: function(rdata){
-            pop_data = rdata;
+            pop_data = rdata["history"];
+            img_path = rdata["img_path"];
         },
         dataType: "json"
     });
@@ -313,11 +315,19 @@ function pop(record_id) {
         '<div id="mry-opo"><div id="mry-opo-title">详情</div><div id="mry-opo-content">' +
         '<a href="javascript:void(0)" deletes="mry-opo"' +
         ' style="position:absolute;right:10px;top:6px;color:#fff;font-size:12px;">X</a>' +
-        '<table class="pop-table">';
+        '<div class="guess-img"><img src="'+ img_path +'"/></div>' +
+        '<div class="pop-table"><table>';
+    pop_text = pop_text + '<tr><th>轮次</th><th>问题</th><th>回复</th></tr>';
+    var index = 1;
     for (var i in pop_data){
-        pop_text = pop_text + '<tr> <td> ' + pop_data[i] + ' </td></tr>';
+        pop_text = pop_text + '<tr>'
+        pop_text = pop_text + '<td> ' + index + ' </td>';
+        pop_text = pop_text + '<td> ' + pop_data[i][0] + ' </td>';
+        pop_text = pop_text + '<td> ' + pop_data[i][1] + ' </td>';
+        pop_text = pop_text + '</tr>';
+        index ++;
     }
-    pop_text = pop_text + '</table></div></div>';
+    pop_text = pop_text + '</table></div></div></div>';
     $('body').append(pop_text);
     $('[deletes=mry-opo]').click(function () {
         $('#mry-opo,#mry-mask').remove();

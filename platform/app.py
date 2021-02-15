@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, request, render_template, jsonify
 from mysql.db_init import get_conn
-import re
 import time
 import os
 import random
@@ -31,11 +30,11 @@ answer_dict = {
 
 
 queries = [
-    'is it a person ?',
-    'is it skis ?',
-    'are they on the skis ?',
-    'are they on the skis ?',
-    'are they on the left ?'
+    'is it a person ?',  # no
+    'are they on the skis ?',  # no
+    'are they on the skis ?',  # no
+    'is it skis ?',  # yes
+    'are they on the left ?'  # yes
 ]
 index = 0
 
@@ -79,7 +78,7 @@ def tabel_method():
 
 @app.route('/home/', methods=["GET"])
 def home_method():
-    return render_template("home.html", user_id="tom")
+    return render_template("home.html", user_id="sssn")
 
 
 @app.route('/request/query/', methods=["POST"])
@@ -87,7 +86,6 @@ def request_query_method():
     record_id = request.form["record_id"].strip()
     user_id = request.form["user_id"].strip()
     img_name = request.form["img_name"].strip().split("/")[-1]
-    print("record_id:", record_id, "user_id:", user_id, "img_name:", img_name)
     global control_state
     global index
     last_time = time.time()
@@ -106,7 +104,7 @@ def request_query_method():
         shutil.copy(img_path, tgt_path)
     else:
         control_state[record_id]["last_time"] = last_time
-        answer = answer_dict[request.form["anwser"].strip().lower()]
+        answer = answer_dict[request.form["answer"].strip().lower()]
         control_state[record_id]["history"].append({
             "query": control_state[record_id]["last_query"],
             "answer": answer
@@ -121,7 +119,7 @@ def request_query_method():
 
 
 @app.route('/request/img/', methods=["GET"])
-def request__img_method():
+def request_img_method():
     img_name = random.choice(available_imgs)
     img_path = "/static/gw_raw_imgs/" + img_name
     return jsonify({"img_path": img_path})
@@ -133,28 +131,32 @@ def request_guess_method():
     global control_state
     last_time = time.time()
     control_state[record_id]["last_time"] = last_time
-    answer = answer_dict[request.form["anwser"].strip().lower()]
+    answer = answer_dict[request.form["answer"].strip().lower()]
     control_state[record_id]["history"].append({
         "query": control_state[record_id]["last_query"],
         "answer": answer
     })
-    img_path = "./static/guess.jpg"
+    img_path = "./static/guess.png"
     tgt_path = os.path.join("./static/guesswhat_img", record_id)
     shutil.copy(img_path, tgt_path)
-    return jsonify({"img_path": tgt_path})
+    return jsonify({"img_path": "/static/guesswhat_img/" + record_id})
 
 
 @app.route('/record/insert/', methods=["POST"])
 def record_insert_method():
     record_id = request.form["record_id"].strip()
-    guess = str(request.form["guess"])
+    guess = request.form["guess"].strip().lower()
+    if guess == "yes":
+        guess = 1
+    else:
+        guess = 0
     global control_state
     user_id = control_state[record_id]["user_id"]
     img_name = control_state[record_id]["img_name"]
     history = "\n".join(
         [each["query"] + "\t" + each["answer"] for each in control_state[record_id]["history"]]
     )
-    control_state.pop(record_id)
+    print(control_state.pop(record_id))
     cur_str = 'insert into `guesswhat_record`'
     cur_str += '(`record_id`, `username`, `img_name`, `history`, `guess`) '
     cur_str += 'values(%s, %s, %s, %s, %s)'
@@ -164,7 +166,7 @@ def record_insert_method():
         args=(record_id, user_id, img_name, history, guess)
     )
     conn.commit()
-    return jsonify({})
+    return jsonify({"guess": guess})
 
 
 @app.route('/record/get/', methods=["GET"])
@@ -172,13 +174,18 @@ def get_record_method():
     user_id = request.args.get("user_id")
     cur = conn.cursor()
     cur.execute(
-        'select record_id, img_name, create_time, guess from `guesswhat_record` where user=%s',
+        'select record_id, img_name, create_time, guess from `guesswhat_record` where username=%s',
         args=str(user_id)
     )
     records = cur.fetchall()
     cur.close()
     records = [
-        {"record_id": record[0], "img_name": record[1], "create_time": record[2], "guess": record[3]} for record in records]
+        {
+            "record_id": record[0],
+            "img_name": record[1],
+            "create_time": record[2],
+            "guess": "yes" if record[3] == 1 else "no"
+        } for record in records]
     return jsonify(records)
 
 
@@ -191,6 +198,6 @@ def detail_record_method():
         args=str(record_id)
     )
     records = cur.fetchone()[0]
-    detail = re.split("[\n]", records)
+    detail = [record.split("\t") for record in records.split("\n")]
     img_path = "/static/guesswhat_img/" + record_id
     return jsonify({"history": detail, "img_path": img_path})
