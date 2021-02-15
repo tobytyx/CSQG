@@ -14,7 +14,7 @@ from models.qgen.qgen_wrapper import QuestionWrapper
 
 def main():
     parser = looper_arguments()
-    args, unknown = parser.parse_known_args()
+    args, _ = parser.parse_known_args()
     args = vars(args)
     print(args)
     data_dir = "./../data"
@@ -42,7 +42,7 @@ def main():
 
 def greedy_main():
     parser = rl_looper_arguments()
-    args, unknown = parser.parse_known_args()
+    args, _ = parser.parse_known_args()
     args = vars(args)
     logger = logging.getLogger()
     args["cate_rl"] = "cls" in args["rl_task"]
