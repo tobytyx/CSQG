@@ -87,7 +87,9 @@ def request_query_method():
     record_id = request.form["record_id"].strip()
     user_id = request.form["user_id"].strip()
     img_name = request.form["img_name"].strip().split("/")[-1]
+    print("record_id:", record_id, "user_id:", user_id, "img_name:", img_name)
     global control_state
+    global index
     last_time = time.time()
     if len(record_id) == 0:
         record_id = str(uuid.uuid4())
@@ -114,6 +116,7 @@ def request_query_method():
         "query": queries[index],
         "record_id": record_id,
     }
+    index += 1
     return jsonify(res)
 
 

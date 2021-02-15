@@ -41,11 +41,11 @@ var start_chat = false;
           this.$textarea.val('');
           // responses
           
-          var query = ""
+          var query = "";
           $.ajax({
             type: 'POST',
             async: false,
-            url: "/request/query",
+            url: "/request/query/",
             data: {"user_id": user_id, "img_name": img_path, "record_id": record_id},
             success: function(rdata){
               query = rdata["query"];
@@ -53,6 +53,7 @@ var start_chat = false;
             },
             dataType: "json"
           });
+          console.log("query: ", query);
           var templateResponse = Handlebars.compile( $("#message-response-template").html());
           var contextResponse = { 
             response: query,
@@ -70,7 +71,7 @@ var start_chat = false;
           $.ajax({
             type: 'POST',
             async: false,
-            url: "/request/query",
+            url: "/request/query/",
             data: {"user_id": user_id, "img_name": img_path, "record_id": record_id},
             success: function(rdata){
               query = rdata["query"];
