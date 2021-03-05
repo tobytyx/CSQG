@@ -18,6 +18,7 @@ def looper_arguments():
 def rl_looper_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("--name", type=str, default="default")
+    parser.add_argument("--option", type=str, default="new_pictures", choices=["new_pictures", "new_objects"])
     parser.add_argument("--log_step", type=int, default=200)
     parser.add_argument("--epoch", type=int, default=100)
     parser.add_argument("--batch_size", type=int, default=128, help="batch size for batched generating new games")

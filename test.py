@@ -44,6 +44,7 @@ def greedy_main():
     parser = rl_looper_arguments()
     args, _ = parser.parse_known_args()
     args = vars(args)
+    print(args)
     logger = logging.getLogger()
     args["cate_rl"] = "cls" in args["rl_task"]
     args["gen_rl"] = "gen" in args["rl_task"]
@@ -58,7 +59,7 @@ def greedy_main():
         with open(result_file, mode="r") as f:
             res = json.load(f)
     models_name = ",".join(
-        [str(args["max_turn"])+"turns", args["qgen_name"], args["oracle_name"], args["guesser_name"]])
+        [args["option"], str(args["max_turn"])+"turns", args["qgen_name"], args["oracle_name"], args["guesser_name"]])
     res[models_name] = round(success_rate, 4)
     print("successful rate: {:.2f}%".format(success_rate*100))
     with open(result_file, mode="w") as f:
