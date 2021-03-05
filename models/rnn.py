@@ -35,7 +35,7 @@ class GRUEncoder(nn.Module):
         sorted_seq_lengths, indices = torch.sort(lengths, descending=True)
         _, desorted_indices = torch.sort(indices, descending=False)  # 还原需要的indices
         input_seq = input_seq.index_select(0, indices)
-        packed = nn.utils.rnn.pack_padded_sequence(input_seq, sorted_seq_lengths, batch_first=True)
+        packed = nn.utils.rnn.pack_padded_sequence(input_seq, sorted_seq_lengths.cpu(), batch_first=True)
         # Forward pass through RNN cell
         outputs, hidden = self.rnn(packed)
         # Unpack padding

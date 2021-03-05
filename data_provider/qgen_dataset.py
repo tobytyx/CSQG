@@ -102,10 +102,10 @@ def question_collate(batch):
     pad_questions = [question + (max_qs_len - q_lens[i]) * [0] for i, question in enumerate(questions)]
     questions = torch.tensor(pad_questions, dtype=torch.long)
     # 1
-    qs_lens = torch.tensor(q_lens, dtype=torch.int64)
+    qs_lens = torch.tensor(q_lens, dtype=torch.long)
     # 2
     pad_q_indexs = [q_index + (max_turn - turns[i]) * [0] for i, q_index in enumerate(q_indexs)]
-    q_indexs = torch.tensor(pad_q_indexs, dtype=torch.int64)
+    q_indexs = torch.tensor(pad_q_indexs, dtype=torch.long)
     # 3
     pad_answers = [answer + (max_turn - turns[i]) * [2] for i, answer in enumerate(answers)]
     answers = torch.tensor(pad_answers, dtype=torch.long)
