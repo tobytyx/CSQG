@@ -24,16 +24,17 @@ class Looper(object):
         return game_data
 
     def clear_data_for_new_objects(self):
-        game_data = get_games(self.data_dir, "train")
+        multi_cate = self.question.config.get("multi_cate", False)
+        game_data = get_games(self.data_dir, "train", multi_cate)[:20000]
         for i in range(len(game_data)):
             game_data[i].questions = []
             game_data[i].answers = []
             game_data[i].q_cates = []
             game_data[i].status = "incomplete"
             # random choose a object
-            total_object = len(game_data[i].objects)
-            choose_one = random.randint(0, total_object-1)  # this function including both end points.
-            game_data[i].object_id = game_data[i].objects[choose_one].id
+            # total_object = len(game_data[i].objects)
+            # choose_one = random.randint(0, total_object-1)  # this function including both end points.
+            # game_data[i].object_id = game_data[i].objects[choose_one].id
         return game_data
 
     @staticmethod

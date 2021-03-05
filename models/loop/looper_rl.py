@@ -52,7 +52,7 @@ class Looper(object):
         self.qgen_model.load_state_dict(
             torch.load(os.path.join("../out/qgen", qgen_name, "params.pth.tar")), strict=False)
         train_dataset = LoopRlDataset(
-            data_dir, "train", self.qgen_args, self.oracle_args, self.guesser_args, self.tokenizer)
+            data_dir, "train", "train", self.qgen_args, self.oracle_args, self.guesser_args, self.tokenizer)
         # train_dataset.games = train_dataset.games[:100]
         self.train_loader = DataLoader(
             train_dataset,
@@ -62,10 +62,18 @@ class Looper(object):
         for game in train_dataset.games:
             self.gt_qas[game.id] = {"questions": game.questions, "answers": game.answers}
 
-        self.test_loader = DataLoader(
-            LoopRlDataset(data_dir, "test", self.qgen_args, self.oracle_args, self.guesser_args, self.tokenizer),
-            num_workers=4, collate_fn=loop_rl_collate, shuffle=False, batch_size=args["batch_size"]
-        )
+        if args["option"] == "new_objects":
+            print("new objects")
+            self.test_loader = DataLoader(
+                LoopRlDataset(data_dir, "train", "test", self.qgen_args, self.oracle_args, self.guesser_args, self.tokenizer),
+                num_workers=4, collate_fn=loop_rl_collate, shuffle=False, batch_size=args["batch_size"]
+            )
+        else:
+            print("new games")
+            self.test_loader = DataLoader(
+                LoopRlDataset(data_dir, "test", "test", self.qgen_args, self.oracle_args, self.guesser_args, self.tokenizer),
+                num_workers=4, collate_fn=loop_rl_collate, shuffle=False, batch_size=args["batch_size"]
+            )
 
     def rl_train_epoch(self, optimizer):
         self.qgen_model.train()
