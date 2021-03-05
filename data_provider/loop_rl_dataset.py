@@ -8,7 +8,7 @@ from process_data.data_preprocess import get_games
 
 
 class LoopRlDataset(Dataset):
-    def __init__(self, data_dir, dataset, qgen_args, oracle_args, guesser_args, tokenizer):
+    def __init__(self, data_dir, dataset, option, qgen_args, oracle_args, guesser_args, tokenizer):
         self.tokenizer = tokenizer
         self.qgen_args = qgen_args
         self.oracle_args = oracle_args
@@ -26,6 +26,8 @@ class LoopRlDataset(Dataset):
 
         old_games = get_games(data_dir, dataset, True)
         self.games = [g for g in old_games if g.status == "success"]
+        if option == "test":
+            self.games = self.games[:20000]
 
     def __len__(self):
         return len(self.games)
