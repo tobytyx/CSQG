@@ -1,7 +1,5 @@
 .vscode
 __pycache__
 guesswhat_img
-
 *.sh
-
 *.json
